@@ -1,7 +1,8 @@
 import React from 'react';
-import {useState} from 'react';
+import {useState, useContext } from 'react';
 import {Dialog,Box,Typography,TextField,Button,styled} from "@mui/material";
-import { authenticateSignup } from '../../Service/api';
+import { authenticateSignup, authenticateLogin } from '../../Service/api';
+import { DataContext } from '../../Context/DataProvider';
 
 const accountInitialValue = {
     login: {
@@ -20,6 +21,10 @@ const signupInitialvalue = {
     lastname:'',
     email:'',
     phone:'',
+    password:''
+}
+const loginInitialvalue = {
+    email:'',
     password:''
 }
 
@@ -48,14 +53,14 @@ const LoginButton = styled(Button)`
         border: 1px solid #fb641b;
     }
 `
-const RequestOTP = styled (Button)`
-    text-transform: none;
-    background:#fff;
-    height: 48px;
-    color:#2874f0;
-    border-radius: 2px;
-    box-shadow: 0 2px 3px 0 rgb(0,0,0,20);
-`
+// const RequestOTP = styled (Button)`
+//     text-transform: none;
+//     background:#fff;
+//     height: 48px;
+//     color:#2874f0;
+//     border-radius: 2px;
+//     box-shadow: 0 2px 3px 0 rgb(0,0,0,20);
+// `
 const Text = styled(Typography)`
     font-size: 12px;
     color:#878787;
@@ -67,26 +72,53 @@ const Account = styled (Typography)`
     cursor: pointer;
     text-align:center;
 `
+const Error = styled(Typography)`
+    font-size: 10px;
+    color:#ff6161;
+    line-height:0;
+    font-weight:600;
+    margin-top:10px
+`
 
 const LoginDialog = ({open,setOpen}) => {
 
     const [account, toggleAccount] = useState(accountInitialValue.login);
     const [signup, setSignup] = useState(signupInitialvalue);
+    const [login,setLogin] = useState(loginInitialvalue);
+    const [error, setError] = useState(false);
+    const {setAccount} = useContext(DataContext);
 
     const handleClose = () =>{
         setOpen(false);
         toggleAccount(accountInitialValue.login);
+        setError(false);
     }
     const toggleSignup = ()=>{
         toggleAccount (accountInitialValue.signup);
     }
     const onInputChange = (e)=>{
-        setSignup ({...signup , [e.target.name] : e.target.value})
+        setSignup ({...signup , [e.target.name] : e.target.value});
     
     }
     const SignupUser = async()=>{
-        const response = await authenticateSignup(signup);
-        console.log(response);
+        let response = await authenticateSignup(signup);
+        if(!response) return;
+        handleClose();
+        setAccount(signup.firstname);
+    }
+    const onValueChange =(e)=>{
+        setLogin({...login, [e.target.name] : e.target.value});
+    }
+    const LoginUser = async()=>{
+        let response = await authenticateLogin(login);
+        if(response.status === 200){
+            handleClose();
+            setAccount(response.data.data.firstname);
+        }
+        else {
+            setError(true);
+        }
+        
     }
 
 //https://assets.aftership.com/couriers/svg/ekart.svg PaperProps={{sx:{maxWidth:'unset'}}}
@@ -103,12 +135,17 @@ const LoginDialog = ({open,setOpen}) => {
                     account.view === 'login' ?
                 
                 <Wrapper>
-                    <TextField variant="standard" label="Enter Email/Mobile No."></TextField>
-                    <TextField variant="standard" label="Enter Password"></TextField>
-                    <Text>By continuing you agree E-Cart to Terms of Use and Privacy policy.</Text>
-                    <LoginButton>LOGIN</LoginButton>
-                    <Typography style={{textAlign:'center'}}>OR</Typography>
-                    <RequestOTP>Request OTP</RequestOTP>
+                    <TextField variant="standard" onChange= {(e)=> onValueChange(e)} name='email' label="Enter Email"></TextField>
+                    {
+                    error && 
+                    <Error>Please enter valid email and password</Error>
+                    }
+
+                    <TextField variant="standard" onChange= {(e)=> onValueChange(e)} name="password" label="Enter Password"></TextField>
+                    <Text style={{marginBottom:"20px"}}>By continuing you agree E-Cart to Terms of Use and Privacy policy.</Text>
+                    <LoginButton onClick={()=> LoginUser()}>LOGIN</LoginButton>
+                    {/* <Typography style={{textAlign:'center'}}>OR</Typography>
+                    <RequestOTP>Request OTP</RequestOTP> */}
                     <Account onClick={ () => toggleSignup()}>New to E-Cart? Create an account</Account>
                 </Wrapper>
                 :
