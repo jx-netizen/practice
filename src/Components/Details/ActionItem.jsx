@@ -5,6 +5,8 @@ import FlashOnIcon from "@mui/icons-material/FlashOn"
 import { useNavigate } from "react-router-dom";
 import {addToCart} from "../../Redux/Action/cartActions";
 import { useDispatch } from "react-redux";
+import { payment } from "../../Service/api";
+import { post } from "../../utils/Paytm";
 
 const Wrapper = styled(Box)(({ theme }) => ({
     minWidth: '40%',
@@ -39,6 +41,14 @@ const ActionItem = ({ product }) => {
     dispatch(addToCart(id,quantity));
     navigate('/cart');
   }
+  const buyNow =async()=>{
+    let response = await payment({ amount: 500, email: 'codeforinterview01@gmail.com'});
+        var information = {
+            action: 'https://securegw-stage.paytm.in/order/process',
+            params: response    
+        }
+        post(information);
+  }
   return (
     <>
       <Wrapper>
@@ -46,7 +56,7 @@ const ActionItem = ({ product }) => {
             <Image src={product.product.detailUrl} alt="img" />
         </Box>
         <CartButton variant="contained" onClick={()=>addTocart()} style={{marginRight:10,background:'#ff9f00'}}><ShoppingCartIcon />Add to Cart</CartButton>
-        <CartButton variant="contained" style={{background:'#fb541b'}}><FlashOnIcon/>Buy Now</CartButton>
+        <CartButton variant="contained" onClick={()=> buyNow()} style={{background:'#fb541b'}}><FlashOnIcon/>Buy Now</CartButton>
       </Wrapper>
     </>
   );

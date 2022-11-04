@@ -16,3 +16,13 @@ export const authenticateLogin = async (user) => {
         return error.response;
     }
 }
+export const payment = async(data) =>{
+    try{
+        let response = await axios.post('http://localhost:8800/payment',data)
+        return response.data;
+
+    }
+    catch(error){
+        console.log('Error while payment api calling', error)
+    }
+}

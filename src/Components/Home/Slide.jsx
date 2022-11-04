@@ -21,7 +21,7 @@ const responsive = {
 
 const Wrapper = styled(Box)`
   margin-top: 10px;
-  background: #fffff;
+  background: #fff;
 `;
 const Deal = styled(Box)`
   padding: 15px 20px;
@@ -35,7 +35,7 @@ const Timer = styled(Box)`
 `;
 const Image = styled("img")({
   width: "auto",
-  height: 150,
+  height: '150px',
 });
 
 const Text = styled(Typography)`
